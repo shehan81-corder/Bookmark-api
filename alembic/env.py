@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 from app.db.base import Base
-from app.models import user, bookmark, tag
+from app.db import models
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context

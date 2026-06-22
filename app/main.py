@@ -1,8 +1,7 @@
 from fastapi import FastAPI
+from app.db import models
+from app.api import auth
 
 app = FastAPI(title="Bookmarks API")
 
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
