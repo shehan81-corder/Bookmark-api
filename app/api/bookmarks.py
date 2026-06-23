@@ -11,6 +11,7 @@ from sqlalchemy import func
 from typing import Optional
 from app.core.security import get_current_user
 from app.models.tag import Tag
+from app.core.exceptions import BookmarkNotFound
 
 router = APIRouter(tags=["bookmarks"])
 
@@ -128,7 +129,7 @@ def get_bookmark(
         Bookmark.user_id == current_user.id
     ).first()
     if not bookmark:
-        raise HTTPException(status_code=404, detail="Bookmark not found")
+        raise BookmarkNotFound()
     return bookmark
 
 
@@ -147,7 +148,7 @@ def update_bookmark(
         Bookmark.user_id == current_user.id
     ).first()
     if not bookmark:
-        raise HTTPException(status_code=404, detail="Bookmark not found")
+        raise BookmarkNotFound()
 
     if data.url is not None:
         bookmark.url = str(data.url)
@@ -177,7 +178,7 @@ def delete_bookmark(
         Bookmark.user_id == current_user.id
     ).first()
     if not bookmark:
-        raise HTTPException(status_code=404, detail="Bookmark not found")
+        raise BookmarkNotFound()
 
     db.delete(bookmark)
     db.commit()

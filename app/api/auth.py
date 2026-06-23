@@ -4,6 +4,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, TokenResponse, UserLogin
 from app.core.security import hash_password, verify_password, create_access_token
+from app.core.exceptions import UserAlreadyExists, InvalidCredentials
 
 router = APIRouter(tags=["auth"])
 
@@ -17,10 +18,7 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
         (User.email == user_data.email) | (User.username == user_data.username)
     ).first()
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Username or email already registered"
-        )
+        raise UserAlreadyExists()
 
     user = User(
         username=user_data.username,
@@ -42,9 +40,7 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
     """
     user = db.query(User).filter(User.email == credentials.email).first()
     if not user or not verify_password(credentials.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
-        )
+        raise InvalidCredentials()
+
     token = create_access_token(user.id)
     return {"user": user, "token": token}
