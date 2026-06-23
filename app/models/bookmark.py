@@ -26,4 +26,6 @@ class Bookmark(Base):
     )
 
     user = relationship("User", back_populates="bookmarks")
-    tags = relationship("Tag", secondary=bookmark_tags, backref="bookmarks", lazy="selectin")
+    tags = relationship("Tag", secondary=bookmark_tags,
+                        backref="bookmarks", lazy="selectin")
+    tags = relationship("Tag", secondary=bookmark_tags, lazy="subquery")
