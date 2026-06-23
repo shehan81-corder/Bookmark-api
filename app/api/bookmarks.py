@@ -50,14 +50,6 @@ def create_bookmark(
     return bookmark
 
 
-@router.get("", response_model=list[BookmarkResponse])
-def list_bookmarks(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    return db.query(Bookmark).filter(Bookmark.user_id == current_user.id).all()
-
-
 @router.get("/stats")
 def get_stats(
     db: Session = Depends(get_db),
