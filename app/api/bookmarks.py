@@ -12,7 +12,7 @@ from typing import Optional
 from app.core.security import get_current_user
 from app.models.tag import Tag
 
-router = APIRouter()
+router = APIRouter(tags=["bookmarks"])
 
 
 def get_or_create_tags(tag_names: list[str], db: Session) -> list[Tag]:
@@ -27,12 +27,18 @@ def get_or_create_tags(tag_names: list[str], db: Session) -> list[Tag]:
     return tags
 
 
-@router.post("", response_model=BookmarkResponse, status_code=201)
+@router.post("", response_model=BookmarkResponse, status_code=201, responses={
+    401: {"description": "Not authenticated"},
+    422: {"description": "Validation error"}
+})
 def create_bookmark(
     data: BookmarkCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    """
+    Creates a new bookmark for the current user.
+    """
     bookmark = Bookmark(
         url=str(data.url),
         title=data.title,
@@ -55,6 +61,10 @@ def get_stats(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    """
+    Returns aggregated statistics for the current user's bookmarks
+    including total counts, top tags, and monthly breakdown.
+    """
     total_bookmarks = db.execute(
         text("SELECT COUNT(*) FROM bookmarks WHERE user_id = :user_id"),
         {"user_id": current_user.id}
@@ -110,6 +120,9 @@ def get_bookmark(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    """
+    Returns the bookmark with the specified ID if it belongs to the current user.
+    """
     bookmark = db.query(Bookmark).filter(
         Bookmark.id == bookmark_id,
         Bookmark.user_id == current_user.id
@@ -126,6 +139,9 @@ def update_bookmark(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    """
+    Updates the bookmark with the specified ID if it belongs to the current user.
+    """
     bookmark = db.query(Bookmark).filter(
         Bookmark.id == bookmark_id,
         Bookmark.user_id == current_user.id
@@ -153,6 +169,9 @@ def delete_bookmark(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    """
+    Deletes the bookmark with the specified ID if it belongs to the current user.
+    """
     bookmark = db.query(Bookmark).filter(
         Bookmark.id == bookmark_id,
         Bookmark.user_id == current_user.id
@@ -175,6 +194,9 @@ def list_bookmarks(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    """
+    Returns a list of bookmarks for the current user with optional filtering and pagination.
+    """
     query = db.query(Bookmark).filter(Bookmark.user_id == current_user.id)
 
     if tag:
