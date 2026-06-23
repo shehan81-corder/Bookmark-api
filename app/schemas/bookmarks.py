@@ -1,4 +1,4 @@
-from pydantic import BaseModel, AnyHttpUrl, field_validator
+from pydantic import BaseModel, AnyHttpUrl, field_validator, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -65,6 +65,8 @@ class BookmarkUpdate(BaseModel):
 
 
 class BookmarkResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     url: str
     title: str
@@ -72,6 +74,3 @@ class BookmarkResponse(BaseModel):
     tags: list[TagResponse] = []
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
